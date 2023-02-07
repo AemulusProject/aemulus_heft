@@ -59,7 +59,7 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
         'output': 'mPk mTk',
         'z_pk': '0.0,99',
         'P_k_max_h/Mpc': 20.,
-        'm_ncdm': cosmo[7]/3,
+        'm_ncdm': cosmo[6]/3,
         'deg_ncdm': 3,
         'T_cmb': 2.7255,
         'A_s': cosmo[4] * 10**-9,
@@ -102,7 +102,7 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
         
     pk_cleft = np.zeros((14,len(k)))
     for s in np.arange(14):
-	    if s in [0, 2, 5, 9]:
+        if s in [0, 2, 5, 9]:
             pk_cleft[s, :] = pk_m_cleft[s_m_map[s]]
         else:
             pk_cleft[s, :] = pk_cb_cleft[s_cb_map[s]]

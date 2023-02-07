@@ -1,6 +1,7 @@
 import numpy as np
 import h5py as h5
 from scipy.interpolate import interp1d
+import os
 
 
 class LPTEmulator(object):
@@ -10,7 +11,7 @@ class LPTEmulator(object):
     def __init__(
         self,
         forceLPT=True,
-        training_file=None,
+        training_file='training_data.json',
     ):
         """
         Initialize the emulator object. Default values for all kwargs were
@@ -25,8 +26,16 @@ class LPTEmulator(object):
         """
         self.nspec = 14
         self.forceLPT = forceLPT
+        
+        training_file_abspath = "/".join(
+            [
+                os.path.dirname(os.path.realpath(__file__)),
+                "data",
+                training_file,
+            ]
+        )
 
-        with h5.File(training_file, "r") as fp:
+        with h5.File(training_file_abspath, "r") as fp:
             self.coeff = fp["pce_coefficients"][:]
             self.exp = fp["pce_exponents"][:]
             self.param_mean = fp["param_mean"][:]
