@@ -65,7 +65,7 @@ class HEFTEmulator(object):
                 use the emulator.
             cosmo : array-like
                 Vector containing cosmology/scale factor in the order
-                (ombh2, omch2, w0, ns, 10^9 As, H0, logmnu, loga).
+                (ombh2, omch2, w0, ns, 10^9 As, H0, mnu, sigma8(z)).
             spec_lpt : array-like
                 LPT predictions for spectra from velocileptors at the specified cosmology
                 call.

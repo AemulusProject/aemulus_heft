@@ -45,7 +45,7 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
                     use the emulator.
         z (float): redshift
         cosmo (array-like): Vector containing cosmology in the order
-                            (ombh2, omch2, w0, ns, 10^9 As, H0, logmnu).  
+                            (ombh2, omch2, w0, ns, 10^9 As, H0, mnu).  
         pkclass (Class object, optional): Class for this cosmology if already run.
                                           Defaults to None.
     """
