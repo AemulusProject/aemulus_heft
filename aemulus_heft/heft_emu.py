@@ -4,7 +4,7 @@ from scipy.interpolate import interp1d
 import os
 
 
-class LPTEmulator(object):
+class HEFTEmulator(object):
 
     """Main emulator object"""
 
@@ -35,17 +35,18 @@ class LPTEmulator(object):
             ]
         )
 
-        with h5.File(training_file_abspath, "r") as fp:
-            self.coeff = fp["pce_coefficients"][:]
-            self.exp = fp["pce_exponents"][:]
-            self.param_mean = fp["param_mean"][:]
-            self.param_mult = fp["param_mult"][:]
-            self.pcs_mean = fp["pcs_mean"][:]
-            self.pcs_mult = fp["pcs_mult"][:]
-            self.evec_spec = fp["evec_spec"][:]
-            self.k = fp["k"][:]
-            self.kmin = fp["k_min"][:]
-            self.kmax = fp["k_max"][:]
+        with open(training_file, 'r') as f:
+            fp = json.load(f)
+            self.coeff = np.array(fp['pce_coefficients'])
+            self.exp = np.array(fp['pce_exponents'])
+            self.param_mean = np.array(fp['param_mean'])
+            self.param_mult = np.array(fp['param_mult'])
+            self.pcs_mean = np.array(fp['pcs_mean'])
+            self.pcs_mult = np.array(fp['pcs_mult'])
+            self.evec_spec = np.array(fp['evec_spec'])
+            self.k = np.array(fp['k'])
+            self.kmin = np.array(fp['k_min'])
+            self.kmax = np.array(fp['k_max'])
 
         self.evec_spline = interp1d(
             self.k, self.evec_spec, axis=1, fill_value=0, bounds_error=False
