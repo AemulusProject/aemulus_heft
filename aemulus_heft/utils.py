@@ -84,25 +84,31 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
             for ki in kt * h
         ]
     )
-    pk_cb_lin_zb = np.array(
+    pk_cb_lin = np.array(
         [
             pkclass.pk_cb_lin(ki, np.array([z])) * h ** 3
             for ki in kt * h
         ]
     )
+    
+    pk_cb_m_lin = np.sqrt(pk_m_lin * pk_cb_lin)
 
     cleft_m_spline, _ = _cleft_pk(kt, pk_m_lin)
-    cleft_cb_spline, _ = _cleft_pk(kt, pk_cb_lin_zb)
+    cleft_cb_spline, _ = _cleft_pk(kt, pk_cb_lin)
+    cleft_cb_m_spline, _ = _cleft_pk(kt, pk_cb_m_lin)
     
     pk_m_cleft = cleft_m_spline(k)[1:]
     pk_cb_cleft = cleft_cb_spline(k)[1:]
+    pk_cb_m_cleft = cleft_cb_m_spline(k)[1:]
 
-    s_m_map = {0: 0, 2: 1, 5: 3, 9: 6}
+    s_m_map = {2: 1, 5: 3, 9: 6}
     s_cb_map = {1: 0, 3: 1, 4: 2, 6: 3, 7: 4, 8: 5, 10: 6, 11: 7, 12: 8, 13: 9}
         
     pk_cleft = np.zeros((14,len(k)))
     for s in np.arange(14):
-        if s in [0, 2, 5, 9]:
+        if s==0:
+            pk_cleft[s, :] = pk_m_cleft[0]
+        if s in [2, 5, 9]:
             pk_cleft[s, :] = pk_m_cleft[s_m_map[s]]
         else:
             pk_cleft[s, :] = pk_cb_cleft[s_cb_map[s]]
