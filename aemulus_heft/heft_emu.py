@@ -1,8 +1,7 @@
 import numpy as np
-import h5py as h5
 from scipy.interpolate import interp1d
 import os
-
+import json
 
 class HEFTEmulator(object):
 
@@ -35,7 +34,7 @@ class HEFTEmulator(object):
             ]
         )
 
-        with open(training_file, 'r') as f:
+        with open(training_file_abspath, 'r') as f:
             fp = json.load(f)
             self.coeff = np.array(fp['pce_coefficients'])
             self.exp = np.array(fp['pce_exponents'])
