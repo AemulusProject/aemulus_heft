@@ -83,8 +83,8 @@ class HEFTEmulator(object):
             # to keep API same as before for aemulus alpha
             x = cosmo.T
 
-        if np.any(np.max(k) > self.k):
-            if np.all(np.max(k) > self.k):
+        if np.any(k > np.max(self.kmax)):
+            if np.all(k > np.max(self.kmax)):
                 raise (
                     ValueError(
                         "Trying to compute spectra beyond the maximum value of the emulator!"
@@ -134,9 +134,8 @@ class HEFTEmulator(object):
 
         pk_emu = np.zeros_like(spectra_lpt)
         pk_emu[:] = spectra_lpt
-
         # set spectra above kmax to 0
-        pk_emu[:, k[np.newaxis, :] > self.kmax[:, np.newaxis]] = 0
+        pk_emu[k[np.newaxis, :] > self.kmax[:, np.newaxis]] = 0
 
         # Enforce agreement with LPT
         if self.forceLPT:
