@@ -26,10 +26,10 @@ def _cleft_pk(k, p_lin):
     cleftobj.make_ptable(D=1, kmin=k[0], kmax=k[-1], nk=1000)
     cleftpk = cleftobj.pktable.T
 
-    cleftpk[2, :] /= 2
-    cleftpk[6, :] /= 0.25
-    cleftpk[7, :] /= 2
-    cleftpk[8, :] /= 2
+    cleftpk[2, :] /= 2 #(1 d)
+    cleftpk[6, :] /= 0.25 # (d2 d2)
+    cleftpk[7, :] /= 2 #(1 s)
+    cleftpk[8, :] /= 2 #(d s)
 
     cleftspline = interp1d(cleftpk[0], cleftpk, fill_value='extrapolate')
 
@@ -76,6 +76,7 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
         pkclass.set(cosmo_dict)
         pkclass.compute()
 
+    sigma8z = pkclass.sigma(8, z, h_units=True)
     kt = np.logspace(-3, 1, 100)
 
     pk_m_lin = np.array(
@@ -113,5 +114,5 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
         else:
             pk_cleft[s, :] = pk_cb_cleft[s_cb_map[s]]
 
-    return pk_cleft
+    return pk_cleft, sigma8z
 
