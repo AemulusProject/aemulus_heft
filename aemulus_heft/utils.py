@@ -110,7 +110,7 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
         if s==0:
             pk_cleft[s, :] = pk_m_cleft[0]
         if s in [2, 5, 9]:
-            pk_cleft[s, :] = pk_m_cleft[s_m_map[s]]
+            pk_cleft[s, :] = pk_cb_m_cleft[s_m_map[s]]
         else:
             pk_cleft[s, :] = pk_cb_cleft[s_cb_map[s]]
 
