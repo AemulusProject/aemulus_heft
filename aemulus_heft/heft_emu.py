@@ -147,7 +147,7 @@ class HEFTEmulator(object):
         else:
             pk_emu[...] = 10 ** (simoverlpt_emu) * pk_emu[...]
 
-        return pk_emu, lambda_surr
+        return pk_emu
 
     def basis_to_full(self, k, btheta, emu_spec, cross=True):
         """
