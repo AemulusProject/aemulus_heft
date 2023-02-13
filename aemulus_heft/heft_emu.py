@@ -99,7 +99,9 @@ class HEFTEmulator(object):
 
         # scale input variables
         x_n = (x - self.param_mean[:, np.newaxis]) * self.param_mult[:, np.newaxis]
-        in_domain = (-1.0001 <= x_n) & (x_n <= 1.0001)
+        
+        #allow for zero neutrino mass extrapolation
+        in_domain = ((-1.0001 <= x_n) & (x_n <= 1.0001)) | ((x[:,6]>=0) & (x_n[:,6] <= 1.0001))
 
         if not in_domain.all():
             raise (ValueError("{} is not in training domain".format(x[~in_domain])))
