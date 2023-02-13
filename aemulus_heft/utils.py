@@ -101,7 +101,6 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
     pk_m_cleft = cleft_m_spline(k)[1:]
     pk_cb_cleft = cleft_cb_spline(k)[1:]
     pk_cb_m_cleft = cleft_cb_m_spline(k)[1:]
-
     s_m_map = {2: 1, 5: 3, 9: 6}
     s_cb_map = {1: 0, 3: 1, 4: 2, 6: 3, 7: 4, 8: 5, 10: 6, 11: 7, 12: 8, 13: 9}
         
@@ -109,7 +108,7 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
     for s in np.arange(14):
         if s==0:
             pk_cleft[s, :] = pk_m_cleft[0]
-        if s in [2, 5, 9]:
+        elif s in [2, 5, 9]:
             pk_cleft[s, :] = pk_cb_m_cleft[s_m_map[s]]
         else:
             pk_cleft[s, :] = pk_cb_cleft[s_cb_map[s]]
