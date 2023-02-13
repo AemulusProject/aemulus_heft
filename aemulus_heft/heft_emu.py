@@ -137,7 +137,7 @@ class HEFTEmulator(object):
         pk_emu = np.zeros_like(spectra_lpt)
         pk_emu[:] = spectra_lpt
         # set spectra above kmax to 0
-        pk_emu[k[np.newaxis, :] > self.kmax[:, np.newaxis]] = 0
+        pk_emu[..., k[np.newaxis, :] > self.kmax[:, np.newaxis]] = 0
 
         # Enforce agreement with LPT
         if self.forceLPT:
