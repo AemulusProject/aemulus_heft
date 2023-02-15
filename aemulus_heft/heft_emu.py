@@ -223,8 +223,7 @@ class HEFTEmulator(object):
                 2 * bs,
                 2 * bs * b1,
                 bs * b2,
-                bs**2,
-                0,
+                bs**2, 
                 2 * bk2,
                 2 * bk2 * b1,
                 bk2 * b2,
@@ -249,8 +248,7 @@ class HEFTEmulator(object):
                 0,
                 bk2,
                 0,
-                0,
-                0,
+                0, 
                 0,
             ]
 
