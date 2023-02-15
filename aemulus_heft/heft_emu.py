@@ -72,9 +72,12 @@ class HEFTEmulator(object):
                 k values LPT predictions are evaluated at if different than k.
 
         Output:
-            Emulator predictions for the 10 basis spectra of the 2nd order lagrangian bias expansion.
-            Order of spectra is 1-1, delta-1, delta-delta, delta2-1, delta2-delta, delta2-delta2
-            s2-1, s2-delta, s2-delta2, s2-s2.
+            Emulator predictions for the basis spectra of the 2nd order lagrangian bias expansion.
+            Since we are treating neutrinos, the lensing and clustering spectra trace the matter field ('1') and
+            the cdm+baryon field ('cb') respectively. This means we have, in fact, 14 basis spectra.  
+
+            Order of spectra is 1-1, cb-cb, delta-1, delta-cb, delta-delta, delta2-1, delta2-cb, delta2-delta,
+            delta2-delta2, s2-1, s2-cb, s2-delta, s2-delta2, s2-s2.
         """
 
         if len(cosmo.shape) == 1:
@@ -224,6 +227,7 @@ class HEFTEmulator(object):
                 2 * bs * b1,
                 bs * b2,
                 bs**2, 
+                #the bnabla spectra start here
                 2 * bk2,
                 2 * bk2 * b1,
                 bk2 * b2,
