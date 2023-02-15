@@ -83,7 +83,7 @@ class HEFTEmulator(object):
         if len(cosmo.shape) == 1:
             x = cosmo[:, np.newaxis]
         else:
-            # to keep API same as before for aemulus alpha
+            # to keep API same as before for aemulus alpha            
             x = cosmo.T
 
         if np.any(k > np.max(self.kmax)):
@@ -106,7 +106,7 @@ class HEFTEmulator(object):
         in_domain = (-1.0001 <= x_n) & (x_n <= 1.0001)
 
         #allow for zero neutrino mass extrapolation
-        if not (in_domain.all(axis=1) | ((x[:,6]>=0) & (x_n[:,6] <= 1.0001))).all():
+        if not (in_domain.all(axis=1) | ((x[6,:]>=0) & (x_n[6,:] <= 1.0001))).all():
             raise (ValueError("{} is not in training domain".format(x[~in_domain])))
 
         # evaluate lpt spectra at correct k if not already
