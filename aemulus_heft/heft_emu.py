@@ -23,7 +23,7 @@ class HEFTEmulator(object):
             training_file: str
                 File that the training data is stored in.
         """
-        self.nspec = 14
+        self.nspec = 15
         self.forceLPT = forceLPT
         
         training_file_abspath = "/".join(
@@ -74,9 +74,9 @@ class HEFTEmulator(object):
         Output:
             Emulator predictions for the basis spectra of the 2nd order lagrangian bias expansion.
             Since we are treating neutrinos, the lensing and clustering spectra trace the matter field ('1') and
-            the cdm+baryon field ('cb') respectively. This means we have, in fact, 14 basis spectra.  
+            the cdm+baryon field ('cb') respectively. This means we have, in fact, 15 basis spectra.  
 
-            Order of spectra is 1-1, cb-cb, delta-1, delta-cb, delta-delta, delta2-1, delta2-cb, delta2-delta,
+            Order of spectra is 1-1, 1-cb, cb-cb, delta-1, delta-cb, delta-delta, delta2-1, delta2-cb, delta2-delta,
             delta2-delta2, s2-1, s2-cb, s2-delta, s2-delta2, s2-s2.
         """
 
@@ -189,6 +189,7 @@ class HEFTEmulator(object):
             # Cross-component-spectra are multiplied by 2, b_2 is 2x larger than in velocileptors
             bterms_hh = [
                 0,
+                0,
                 1,
                 0,
                 2 * b1,
@@ -214,6 +215,7 @@ class HEFTEmulator(object):
             # Cross-component-spectra are multiplied by 2, b_2 is 2x larger than in velocileptors
             bterms_hh = [
                 0,
+                0,
                 1,
                 0,
                 2 * b1,
@@ -236,6 +238,7 @@ class HEFTEmulator(object):
 
             # hm correlations only have one kind of <1,delta_i> correlation
             bterms_hm = [
+                0,
                 1,
                 0,
                 b1,
