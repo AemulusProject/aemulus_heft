@@ -76,7 +76,7 @@ class HEFTEmulator(object):
             Since we are treating neutrinos, the lensing and clustering spectra trace the matter field ('1') and
             the cdm+baryon field ('cb') respectively. This means we have, in fact, 15 basis spectra.  
 
-            Order of spectra is 1-1, 1-cb, cb-cb, delta-1, delta-cb, delta-delta, delta2-1, delta2-cb, delta2-delta,
+            Order of spectra is 1-1 (ie the matter power spectrum), 1-cb, cb-cb, delta-1, delta-cb, delta-delta, delta2-1, delta2-cb, delta2-delta,
             delta2-delta2, s2-1, s2-cb, s2-delta, s2-delta2, s2-s2.
         """
 
@@ -264,9 +264,9 @@ class HEFTEmulator(object):
 
             # IDs for the <nabla^2, X> ~ -k^2 <1, X> approximation.
             if cross:
-                nabla_idx = [0, 2, 5, 9]
-            else:
                 nabla_idx = [1, 3, 6, 10]
+            else:
+                nabla_idx = [2, 4, 7, 11]
 
             # Higher derivative terms
             pkvec[self.nspec :] = -(k**2) * pkvec[nabla_idx]
