@@ -46,6 +46,7 @@ class HEFTEmulator(object):
             self.k = np.array(fp['k'])
             self.kmin = np.array(fp['k_min'])
             self.kmax = np.array(fp['k_max'])
+            self.zs = np.array(fp['zs'])
 
         self.evec_spline = interp1d(
             self.k, self.evec_spec, axis=1, fill_value=0, bounds_error=False
@@ -151,6 +152,28 @@ class HEFTEmulator(object):
             pk_emu[...] = 10 ** (simoverlpt_emu) * pk_emu[...]
 
         return pk_emu
+    
+    def error_covariance(self, spec_heft, k, z, frac_error_cov):
+        """Compute the emulator error covariance for a given set 
+        of HEFT spectra, provided the k and z values used to compute those spectra.
+
+        Args:
+            spec_heft array-like: (15,Nk) array containing HEFT spectra
+            k array-like: (Nk) array containing k values that spec_heft is evaluated at.
+            z float: redshift value that spec_heft is evaluated at.
+            frac_error_cov array-like: (30,15,Nkp,Nkp) array containing the aemulus nu fractional error covariance.
+
+        Returns:
+            cov array-like: (15,Nk,Nk) array containing the aemulus nu emulator error covariance for the provided spectra.
+        """
+        
+        cov = interp1d(self.zs, frac_error_cov, axis=0)(z)
+        cov = interp1d(self.k, cov, axis=1, bounds_error=False, fill_value=0)(k)
+        cov = interp1d(self.k, cov, axis=2, bounds_error=False, fill_value=0)(k)
+        cov *= spec_heft[:,:,np.newaxis] * spec_heft[:,np.newaxis,:]
+    
+        return cov
+        
 
     def basis_to_full(self, k, btheta, emu_spec, cross=True):
         """
