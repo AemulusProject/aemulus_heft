@@ -167,9 +167,9 @@ class HEFTEmulator(object):
             cov array-like: (15,Nk,Nk) array containing the aemulus nu emulator error covariance for the provided spectra.
         """
         
-        cov = interp1d(self.zs, frac_error_cov, axis=0)(z)
-        cov = interp1d(self.k, cov, axis=1, bounds_error=False, fill_value=0)(k)
-        cov = interp1d(self.k, cov, axis=2, bounds_error=False, fill_value=0)(k)
+        cov = interp1d(self.zs, frac_error_cov, axis=0, kind='cubic')(z)
+        cov = interp1d(self.k, cov, axis=1, bounds_error=False, fill_value=0, kind='cubic')(k)
+        cov = interp1d(self.k, cov, axis=2, bounds_error=False, fill_value=0, kind='cubic')(k)
         cov *= spec_heft[:,:,np.newaxis] * spec_heft[:,np.newaxis,:]
     
         return cov
