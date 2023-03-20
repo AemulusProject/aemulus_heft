@@ -1,6 +1,6 @@
 # aemulus_heft
 The emulator formerly known as anzu. A hybrid effective field theory (and matter power spectrum) emulator built from the Aemulus nu simulations 
-described in arxiv:XXX. 
+described in [arxiv:2303.09762](https://arxiv.org/abs/2303.09762). 
 
 
 # Installation
