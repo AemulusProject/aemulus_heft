@@ -145,9 +145,17 @@ class HEFTEmulator(object):
 
         # Enforce agreement with LPT
         if self.forceLPT:
-            pk_emu[..., k[np.newaxis, :] > self.kmin[:, np.newaxis]] = (
-                10 ** (simoverlpt_emu) * pk_emu
-            )[..., k[np.newaxis, :] > self.kmin[:, np.newaxis]]
+            if len(self.kmin.shape)>1:
+                assert(self.kmin.shape[1]==self.nspec)
+                
+                for i in range(self.nspec):
+                    pk_emu[:,i,k > self.kmin[:, i]] = (
+                        10 ** (simoverlpt_emu) * pk_emu
+                        )[..., k > self.kmin[:, i]]
+            else:
+                pk_emu[..., k[np.newaxis, :] > self.kmin[:, np.newaxis]] = (
+                    10 ** (simoverlpt_emu) * pk_emu
+                )[..., k[np.newaxis, :] > self.kmin[:, np.newaxis]]
         else:
             pk_emu[...] = 10 ** (simoverlpt_emu) * pk_emu[...]
 
