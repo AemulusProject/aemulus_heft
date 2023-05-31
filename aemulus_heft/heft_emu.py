@@ -412,19 +412,25 @@ class ScalarEmulator(object):
 
         # linear output layer
         x = ((x @ self.W[-1]) + self.b[-1]) * \
-            self.pc_sigmas[:self.n_components] + \
-            self.pc_mean[:self.n_components]
-        x = x * self.sigmas + self.mean
+            self.pc_sigmas + \
+            self.pc_mean
 
-        return self.k, x
+        return x
     
 
 class NNHEFTEmulator(HEFTEmulator):
 
-    def __init__(self, config):
+    def __init__(self, config='nn_cfg.yaml'):
 
         self.nspec = 15
-        
+        self.param_order = [4, 3, 5, 2, 0, 1, 6, 7]
+        data_dir =  "/".join(
+            [
+                os.path.dirname(os.path.realpath(__file__)),
+                "data",
+            ]
+        )
+            
         config_abspath = "/".join(
             [
                 os.path.dirname(os.path.realpath(__file__)),
@@ -445,18 +451,22 @@ class NNHEFTEmulator(HEFTEmulator):
         self.pij_emus = []
 
         for i in range(self.nspec):
-            self.pij_emus.append(NNEmulator(pij_emu_bases[i], kmin=kmin, kmax=kmax))
+            self.pij_emus.append(NNEmulator(f'{data_dir}/{pij_emu_bases[i]}', kmin=kmin, kmax=kmax))
 
-        self.sigma8z_emu = ScalarEmulator(s8z_base)
+        self.sigma8z_emu = ScalarEmulator(f'{data_dir}/{s8z_base}')
             
     def predict(self, parameters):
+        params = parameters[:,self.param_order]
+        params[:,0] *= 1e-9
+        params[:,-2] = np.log10(params[:,-2])
 
-        s8z = self.sigma8z_emu(parameters)
-        parameters[-1] = s8z
+        s8z = self.sigma8z_emu(params)[:,0]
+        params[:,-1] = s8z
+        npred = len(params)
 
-        pij = np.zeros(self.nspec, len(self.pij_emus[0].k))
-        
+        pij = np.zeros((npred, self.nspec, len(self.pij_emus[0].k)))
+
         for i in range(self.nspec):
-            pij[i,:] = self.pij_emus[i](parameters)
-        
+            _, pij[:,i,:] = self.pij_emus[i](params)
+
         return self.pij_emus[0].k, pij
