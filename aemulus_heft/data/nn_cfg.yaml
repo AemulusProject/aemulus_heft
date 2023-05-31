@@ -1,0 +1,20 @@
+pij_bases:
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p0_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p1_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p2_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p3_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p4_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p5_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p6_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p7_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p8_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p9_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p10_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p11_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p12_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p13_emu
+  - /nn_weights/aemulus_nu_tier1_cosmo_only_heft_p14_emu
+
+s8z_base: /nn_weights/aemulus_nu_tier1_cosmo_only_heft_sigma8z_emu
+kmin: 1e-3
+kmax: 4
