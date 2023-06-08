@@ -420,40 +420,58 @@ class ScalarEmulator(object):
 
 class NNHEFTEmulator(HEFTEmulator):
 
-    def __init__(self, config='nn_cfg.yaml'):
+    def __init__(self, config='nn_cfg.yaml', abspath=False):
 
         self.nspec = 15
         self.param_order = [4, 3, 5, 2, 0, 1, 6, 7]
-        data_dir =  "/".join(
-            [
-                os.path.dirname(os.path.realpath(__file__)),
-                "data",
-            ]
-        )
-            
-        config_abspath = "/".join(
-            [
-                os.path.dirname(os.path.realpath(__file__)),
-                "data",
-                config,
-            ]
-        )        
 
-        with open(config_abspath, 'r') as fp:
-            cfg = yaml.load(fp, Loader=Loader)
-            pij_emu_bases = cfg['pij_bases']
-            s8z_base = cfg['s8z_base']
-            kmin = float(cfg['kmin'])
-            kmax = float(cfg['kmax'])
+        if not abspath:
+            data_dir =  "/".join(
+                [
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "data",
+                ]
+            )
 
-            assert(len(pij_emu_bases) == self.nspec)
+            if type(config) is not dict:
+                config_abspath = "/".join(
+                    [
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "data",
+                        config,
+                    ]
+                )
+                with open(config_abspath, 'r') as fp:
+                    cfg = yaml.load(fp, Loader=Loader)                
+            else:
+                cfg = config
+        else:
+            if type(config) is not dict:
+                config_abspath = config
+                with open(config_abspath, 'r') as fp:
+                    cfg = yaml.load(fp, Loader=Loader)                
+            else:
+                cfg = config
+
+        pij_emu_bases = cfg['pij_bases']
+        s8z_base = cfg['s8z_base']
+        kmin = float(cfg['kmin'])
+        kmax = float(cfg['kmax'])
+
+        assert(len(pij_emu_bases) == self.nspec)
 
         self.pij_emus = []
 
         for i in range(self.nspec):
-            self.pij_emus.append(NNEmulator(f'{data_dir}/{pij_emu_bases[i]}', kmin=kmin, kmax=kmax))
+            if not abspath:
+                self.pij_emus.append(NNEmulator(f'{data_dir}/{pij_emu_bases[i]}', kmin=kmin, kmax=kmax))
+            else:
+                self.pij_emus.append(NNEmulator(pij_emu_bases[i], kmin=kmin, kmax=kmax))
 
-        self.sigma8z_emu = ScalarEmulator(f'{data_dir}/{s8z_base}')
+        if not abspath:
+            self.sigma8z_emu = ScalarEmulator(f'{data_dir}/{s8z_base}')
+        else:
+            self.sigma8z_emu = ScalarEmulator(s8z_base)
             
     def predict(self, parameters):
         params = parameters[:,self.param_order]

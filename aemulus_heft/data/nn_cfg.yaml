@@ -17,4 +17,4 @@ pij_bases:
 
 s8z_base: /nn_weights/aemulus_nu_tier1_cosmo_only_heft_sigma8z_emu
 kmin: 1e-3
-kmax: 4
+kmax: 3.9355007545577743
