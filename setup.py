@@ -8,8 +8,11 @@ def package_files(directory):
             paths.append(os.path.join('..', path, filename))
     return paths
 
-extra_files = package_files('data/nn_weights')
+extra_files = package_files('aemulus_heft/data/nn_weights')
 extra_files.append('data/training_data.json')
+extra_files.append('data/nn_cfg.yaml')
+#extra_files = package_files('data/nn_weights')
+#extra_files.append('data/training_data.json')
 
 setup(
     name='aemulus_heft',
