@@ -1,6 +1,9 @@
+from scipy.interpolate import interp1d
+from scipy.special import expit
+from yaml import Loader
 import numpy as np
 import json
-from scipy.interpolate import interp1d
+import yaml
 import os
 
 class HEFTEmulator(object):
@@ -145,9 +148,17 @@ class HEFTEmulator(object):
 
         # Enforce agreement with LPT
         if self.forceLPT:
-            pk_emu[..., k[np.newaxis, :] > self.kmin[:, np.newaxis]] = (
-                10 ** (simoverlpt_emu) * pk_emu
-            )[..., k[np.newaxis, :] > self.kmin[:, np.newaxis]]
+            if len(self.kmin.shape)>1:
+                assert(self.kmin.shape[1]==self.nspec)
+                
+                for i in range(self.nspec):
+                    pk_emu[:,i,k > self.kmin[:, i]] = (
+                        10 ** (simoverlpt_emu) * pk_emu
+                        )[..., k > self.kmin[:, i]]
+            else:
+                pk_emu[..., k[np.newaxis, :] > self.kmin[:, np.newaxis]] = (
+                    10 ** (simoverlpt_emu) * pk_emu
+                )[..., k[np.newaxis, :] > self.kmin[:, np.newaxis]]
         else:
             pk_emu[...] = 10 ** (simoverlpt_emu) * pk_emu[...]
 
@@ -303,3 +314,197 @@ class HEFTEmulator(object):
             pfull = np.einsum("b, bk->k", bterms_hh, pkvec) + sn
 
         return pfull
+    
+    
+class NNEmulator(object):
+    
+    def __init__(self, filebase, kmin=1e-3, kmax=0.5):
+        super(NNEmulator, self).__init__()
+
+        self.load(filebase)
+
+        self.n_parameters = self.W[0].shape[0]
+        self.n_components = self.W[-1].shape[-1]
+        self.n_layers = len(self.W)
+        self.nk = self.sigmas.shape[0]
+        self.k = np.logspace(np.log10(kmin), np.log10(kmax), self.nk)
+
+    def load(self, filebase):
+        
+        with open('{}.json'.format(filebase), 'r') as fp:
+            weights = json.load(fp)
+            
+            for k in weights:
+                if k in ['W', 'b', 'alphas', 'betas']:
+                    for i, wi in enumerate(weights[k]):
+                        weights[k][i] = np.array(wi).astype(np.float32)
+                else:
+                    weights[k] = np.array(weights[k]).astype(np.float32)
+
+                setattr(self,k, weights[k])
+
+    def activation(self, x, alpha, beta):
+        return (beta + (expit(alpha * x) * (1 - beta))) * x
+
+    def __call__(self, parameters):
+
+        outputs = []
+        x = (parameters - self.param_mean) / self.param_sigmas
+
+        for i in range(self.n_layers - 1):
+
+            # linear network operation
+            x = x @ self.W[i] + self.b[i]
+
+            # non-linear activation function
+            x = self.activation(x, self.alphas[i], self.betas[i])
+
+        # linear output layer
+        x = ((x @ self.W[-1]) + self.b[-1]) * \
+            self.pc_sigmas[:self.n_components] + \
+            self.pc_mean[:self.n_components]
+        x = np.sinh((x @ self.v[:, :self.n_components].T)
+                    * self.sigmas + self.mean) * self.fstd
+
+        return self.k, x    
+
+
+class ScalarEmulator(object):
+    
+    def __init__(self, filebase):
+        super(ScalarEmulator, self).__init__()
+
+        self.load(filebase)
+
+        self.n_parameters = self.W[0].shape[0]
+        self.n_components = self.W[-1].shape[-1]
+        self.n_layers = len(self.W)
+
+    def load(self, filebase):
+        
+        with open('{}.json'.format(filebase), 'r') as fp:
+            weights = json.load(fp)
+            
+            for k in weights:
+                if k in ['W', 'b', 'alphas', 'betas']:
+                    for i, wi in enumerate(weights[k]):
+                        weights[k][i] = np.array(wi).astype(np.float32)
+                else:
+                    weights[k] = np.array(weights[k]).astype(np.float32)
+
+                setattr(self,k, weights[k])
+
+    def activation(self, x, alpha, beta):
+        return (beta + (expit(alpha * x) * (1 - beta))) * x
+
+    def __call__(self, parameters):
+
+        outputs = []
+        x = (parameters - self.param_mean) / self.param_sigmas
+
+        for i in range(self.n_layers - 1):
+
+            # linear network operation
+            x = x @ self.W[i] + self.b[i]
+
+            # non-linear activation function
+            x = self.activation(x, self.alphas[i], self.betas[i])
+
+        # linear output layer
+        x = ((x @ self.W[-1]) + self.b[-1]) * \
+            self.pc_sigmas + \
+            self.pc_mean
+
+        return x
+    
+
+class NNHEFTEmulator(HEFTEmulator):
+
+    def __init__(self, config='nn_cfg.yaml', abspath=False):
+
+        self.nspec = 15
+        self.param_order = [4, 3, 5, 2, 0, 1, 6, 7]
+
+        if not abspath:
+            data_dir =  "/".join(
+                [
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "data",
+                ]
+            )
+
+            if type(config) is not dict:
+                config_abspath = "/".join(
+                    [
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "data",
+                        config,
+                    ]
+                )
+                with open(config_abspath, 'r') as fp:
+                    cfg = yaml.load(fp, Loader=Loader)                
+            else:
+                cfg = config
+        else:
+            if type(config) is not dict:
+                config_abspath = config
+                with open(config_abspath, 'r') as fp:
+                    cfg = yaml.load(fp, Loader=Loader)                
+            else:
+                cfg = config
+
+        pij_emu_bases = cfg['pij_bases']
+        s8z_base = cfg['s8z_base']
+        kmin = float(cfg['kmin'])
+        kmax = float(cfg['kmax'])
+
+        assert(len(pij_emu_bases) == self.nspec)
+
+        self.pij_emus = []
+
+        for i in range(self.nspec):
+            if not abspath:
+                self.pij_emus.append(NNEmulator(f'{data_dir}/{pij_emu_bases[i]}', kmin=kmin, kmax=kmax))
+            else:
+                self.pij_emus.append(NNEmulator(pij_emu_bases[i], kmin=kmin, kmax=kmax))
+
+        if not abspath:
+            self.sigma8z_emu = ScalarEmulator(f'{data_dir}/{s8z_base}')
+        else:
+            self.sigma8z_emu = ScalarEmulator(s8z_base)
+            
+    def predict(self, parameters):
+        """
+        Make predictions from a trained neural network emulator for a given cosmology and redshift.
+        Args:
+            parameters : array-like (Npred, 8)
+                Vector containing cosmology/redshift in the order
+                (ombh2, omch2, w0, ns, 10^9 As, H0, mnu, z).
+
+        Output:
+            k : array-like (Nk)
+              Wavenumbers corresponding to the emulator prediction in units of Mpc/h.
+            pij: array-like (Npred, 15, Nk)
+                Emulator predictions for the basis spectra of the 2nd order lagrangian bias expansion.
+                Since we are treating neutrinos, the lensing and clustering spectra trace the matter field ('1') and
+                the cdm+baryon field ('cb') respectively. This means we have, in fact, 15 basis spectra.  
+
+                Order of spectra is 1-1 (ie the matter power spectrum), 1-cb, cb-cb, delta-1, delta-cb, delta-delta, delta2-1, delta2-cb, delta2-delta,
+                delta2-delta2, s2-1, s2-cb, s2-delta, s2-delta2, s2-s2.
+        """
+        params = parameters[:,self.param_order]
+        params[:,0] *= 1e-9
+        params[:,-2] = np.log10(params[:,-2])
+
+        s8z = self.sigma8z_emu(params)[:,0]
+        params[:,-1] = s8z
+        npred = len(params)
+        
+        k = self.pij_emus[0].k
+
+        pij = np.zeros((npred, self.nspec, len(k)))
+
+        for i in range(self.nspec):
+            _, pij[:,i,:] = self.pij_emus[i](params)
+            
+        return k, pij

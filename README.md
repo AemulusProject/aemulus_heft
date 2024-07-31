@@ -36,6 +36,22 @@ spec_heft = emu.predict(k, np.array(cosmo), spec_lpt)
 
 This returns the HEFT basis spectra, including the matter power spectrum, evaluated at the provided wavenumbers.
 
+Alternatively, you can circumvent calling velocileptors by making predictions with the provided neural network emulator. 
+In this case, redshift should be passed as the last element of the input vector. This outputs emulator 
+predictions at a pre-specified set of wavenumbers, which can then be interpolated over.
+
+```python
+from aemulus_heft.heft_emu import NNHEFTEmulator
+from scipy.interpolate import interp1d
+# (ombh2, omch2, w0, ns, 10^9 As, H0, mnu, z)
+cosmo = [0.0223, 0.12, -1, 0.97, 2.1, 67, 0.06, 0]
+nnemu = NNHEFTEmulator()
+k_nn, spec_heft_nn = nnemu.predict(np.atleast_2d(cosmo))
+
+k = np.logspace(-2, np.log10(0.9), 100)
+spec_heft_nn= interp1d(k_nn, spec_heft_nn, kind='cubic', fill_value='extrapolate')(k)
+```
+
 These can then be used to predict galaxy auto-spectra and galaxy-matter cross-spectra, provided a set of bias parameters via
 ```python
 bvec = [0.786, 0.583, -0.406, -0.512, 1755]
