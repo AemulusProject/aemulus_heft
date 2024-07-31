@@ -11,12 +11,10 @@ def package_files(directory):
 extra_files = package_files('aemulus_heft/data/nn_weights')
 extra_files.append('data/training_data.json')
 extra_files.append('data/nn_cfg.yaml')
-#extra_files = package_files('data/nn_weights')
-#extra_files.append('data/training_data.json')
 
 setup(
     name='aemulus_heft',
-    version='1.0',
+    version='1.1',
     packages=find_packages(),
     package_dir={'aemulus_heft' : 'aemulus_heft'},
     package_data={'aemulus_heft': extra_files},

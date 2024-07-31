@@ -474,6 +474,24 @@ class NNHEFTEmulator(HEFTEmulator):
             self.sigma8z_emu = ScalarEmulator(s8z_base)
             
     def predict(self, parameters):
+        """
+        Make predictions from a trained neural network emulator for a given cosmology and redshift.
+        Args:
+            parameters : array-like (Npred, 8)
+                Vector containing cosmology/redshift in the order
+                (ombh2, omch2, w0, ns, 10^9 As, H0, mnu, z).
+
+        Output:
+            k : array-like (Nk)
+              Wavenumbers corresponding to the emulator prediction in units of Mpc/h.
+            pij: array-like (Npred, 15, Nk)
+                Emulator predictions for the basis spectra of the 2nd order lagrangian bias expansion.
+                Since we are treating neutrinos, the lensing and clustering spectra trace the matter field ('1') and
+                the cdm+baryon field ('cb') respectively. This means we have, in fact, 15 basis spectra.  
+
+                Order of spectra is 1-1 (ie the matter power spectrum), 1-cb, cb-cb, delta-1, delta-cb, delta-delta, delta2-1, delta2-cb, delta2-delta,
+                delta2-delta2, s2-1, s2-cb, s2-delta, s2-delta2, s2-s2.
+        """
         params = parameters[:,self.param_order]
         params[:,0] *= 1e-9
         params[:,-2] = np.log10(params[:,-2])
@@ -481,10 +499,12 @@ class NNHEFTEmulator(HEFTEmulator):
         s8z = self.sigma8z_emu(params)[:,0]
         params[:,-1] = s8z
         npred = len(params)
+        
+        k = self.pij_emus[0].k
 
-        pij = np.zeros((npred, self.nspec, len(self.pij_emus[0].k)))
+        pij = np.zeros((npred, self.nspec, len(k)))
 
         for i in range(self.nspec):
             _, pij[:,i,:] = self.pij_emus[i](params)
-
-        return self.pij_emus[0].k, pij
+            
+        return k, pij
