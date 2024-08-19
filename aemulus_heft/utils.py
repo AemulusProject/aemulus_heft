@@ -77,7 +77,7 @@ def lpt_spectra(k, z, cosmo, pkclass=None):
         pkclass.compute()
 
     sigma8z = pkclass.sigma(8 / h, z)#, h_units=True)
-    kt = np.logspace(-3, 1, 100)
+    kt = np.logspace(-3, 1, 400)
 
     pk_m_lin = np.array(
         [
