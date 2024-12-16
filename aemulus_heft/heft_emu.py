@@ -240,7 +240,23 @@ class HEFTEmulator(object):
             ]
 
             # hm correlations only have one kind of <1,delta_i> correlation
-            bterms_hm = [1, 0, b1, 0, 0, b2 / 2, 0, 0, 0, bs, 0, 0, 0, 0]
+            bterms_hm = [
+                0,
+                1,
+                0,
+                b1,
+                0,
+                0,
+                b2 / 2,
+                0,
+                0,
+                0,
+                bs,
+                0,
+                0,
+                0,
+                0
+            ]
 
             pkvec = emu_spec
 
